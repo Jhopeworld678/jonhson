@@ -1,22 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Johnson Algorithm</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Johnson's Algorithm Interface</title>
+  <style>
+    .edge-input { margin-bottom: 10px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .form-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .form-group label {
+      flex: 0 0 150px;
+    }
+    .form-group input {
+      flex: 0 0 200px;
+      padding: 5px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Алгоритм Джонсона</h1>
-    <label for="numVertices">Введите количество вершин:</label>
-    <input type="number" id="numVertices" min="1" value="1"><br>
-    <label for="numEdges">Введите количество рёбер:</label>
-    <input type="number" id="numEdges" min="0" value="0"><br>
-    <button onclick="createGraph()">Создать граф</button>
-    <div id="graphInput"></div>
-    <button onclick="runJohnson()">Запустить алгоритм Джонсона</button>
-    <div id="error"></div>
-    <div id="output"></div>
+  <h1>Расчет кратчайших путей с помощью алгоритма Джонсона</h1>
+  
+  <form id="initialForm">
+    <div class="form-group">
+      <label for="numVertices">Количество вершин:</label>
+      <input type="number" id="numVertices" name="numVertices" min="1" required>
+    </div>
+    <div class="form-group">
+      <label for="numEdges">Количество рёбер:</label>
+      <input type="number" id="numEdges" name="numEdges" min="1" required>
+    </div>
+    <div>
+      <button type="submit">Далее</button>
+    </div>
+  </form>
 
-    <script src="johnson.js"></script>
+  <form id="edgesForm" style="display: none;">
+    <div id="edgesContainer"></div>
+    <div>
+      <button type="submit">Рассчитать кратчайшие пути</button>
+    </div>
+  </form>
+
+  <h2>Результаты</h2>
+  <div id="results"></div>
+
+  <script src="johnsonAlgorithm.js"></script>
 </body>
 </html>
