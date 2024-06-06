@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Johnson's Algorithm Interface</title>
+  <style>
+    .edge-input { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Расчет кратчайших путей с помощью алгоритма Джонсона</h1>
+  
+  <form id="initialForm">
+    <div>
+      <label for="numVertices">Количество вершин:</label>
+      <input type="number" id="numVertices" name="numVertices" min="1" required>
+    </div>
+    <div>
+      <label for="numEdges">Количество рёбер:</label>
+      <input type="number" id="numEdges" name="numEdges" min="1" required>
+    </div>
+    <div>
+      <button type="submit">Далее</button>
+    </div>
+  </form>
+
+  <form id="edgesForm" style="display: none;">
+    <div id="edgesContainer"></div>
+    <div>
+      <button type="submit">Рассчитать кратчайшие пути</button>
+    </div>
+  </form>
+
+  <h2>Результаты</h2>
+  <div id="results"></div>
+
+  <script src="johnsonAlgorithm.js"></script>
+</body>
+</html>
