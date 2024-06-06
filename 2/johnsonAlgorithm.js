@@ -45,49 +45,58 @@ document.getElementById('edgesForm').addEventListener('submit', function(event) 
   displayResults(results);
 });
 
+
+
+
 function runJohnsonsAlgorithm(numVertices, edges) {
-  // Initialize distances
+  // Инициализация расстояний
+  // зачем то добавил+1 ????
   const dist = Array(numVertices + 1).fill(Infinity);
   dist[numVertices] = 0;
-
-  // Add an extra vertex (numVertices) and connect it to every other vertex with edge weight 0
+  var messages = []
+  // Добавляем дополнительную вершину (numVertices) и соединяем её с каждой другой вершиной с весом 0
   for (let i = 0; i < numVertices; i++) {
     edges.push({ start: numVertices, end: i, weight: 0 });
   }
 
-  // Run Bellman-Ford from the extra vertex to detect negative weight cycles
+  // Запускаем Bellman-Ford из дополнительной вершины, чтобы обнаружить отрицательные циклы
   for (let i = 0; i <= numVertices; i++) {
     for (let j = 0; j < edges.length; j++) {
       const { start, end, weight } = edges[j];
       if (dist[start] + weight < dist[end]) {
         dist[end] = dist[start] + weight;
-      }
-    }
+      } 
+    } 
+    messages.push(`Шаг ${i + 1} алгоритма Беллмана-Форда: ${dist}`)
+    console.log(`Шаг ${i + 1} алгоритма Беллмана-Форда: ${dist}`);
   }
 
-  // Check for negative weight cycles
+  // Проверяем на отрицательные циклы
   for (let j = 0; j < edges.length; j++) {
     const { start, end, weight } = edges[j];
     if (dist[start] + weight < dist[end]) {
-      return { message: "Граф содержит отрицательные циклы", matrix: null };
+      console.log("Граф содержит отрицательные циклы");
+      messages.push("Граф содержит отрицательные циклы");
+      return { message: messages, matrix: null };
     }
   }
 
-  // Remove the extra vertex and its edges
+  // Удаляем дополнительную вершину и её рёбра
   edges = edges.slice(0, edges.length - numVertices);
 
-  // Reweight the edges
+  // Пересчитываем веса рёбер
   const h = dist.slice(0, numVertices);
   for (let i = 0; i < edges.length; i++) {
     const { start, end, weight } = edges[i];
     edges[i].weight = weight + h[start] - h[end];
   }
+  console.log("Пересчитанные веса рёбер:", edges);
 
-  // Initialize result matrix
+  // Инициализация матрицы результатов
   const result = Array.from({ length: numVertices }, () => Array(numVertices).fill(Infinity));
 
-  // Run Dijkstra for each vertex
-  for (let u = 0; u < numVertices; u++) {
+  // Запускаем алгоритм Дейкстры для каждой вершины
+  for (let u = 0; u <numVertices; u++) {
     const dist = Array(numVertices).fill(Infinity);
     dist[u] = 0;
     const pq = new MinPriorityQueue({ priority: x => x.dist });
@@ -104,8 +113,9 @@ function runJohnsonsAlgorithm(numVertices, edges) {
           pq.enqueue({ vertex: end, dist: dist[end] });
         }
       }
+      console.log(`Алгоритм Дейкстры для вершины ${u}: ${dist}`);
     }
-
+    // Записываем результаты с учетом пересчитанных весов
     for (let v = 0; v < numVertices; v++) {
       if (dist[v] < Infinity) {
         result[u][v] = dist[v] - h[u] + h[v];
@@ -113,7 +123,10 @@ function runJohnsonsAlgorithm(numVertices, edges) {
     }
   }
 
-  return { message: "Кратчайшие пути рассчитаны успешно", matrix: result };
+  console.log("Результаты:", result);
+
+  messages.push("Кратчайшие пути рассчитаны успешно:");
+  return { message: messages, matrix: result };
 }
 
 // Класс для приоритетной очереди (минимальная приоритетная очередь)
@@ -121,12 +134,12 @@ class MinPriorityQueue {
   constructor() {
     this.heap = [];
   }
-
+ 
   enqueue(element, priority) {
     this.heap.push({ element, priority });
     this.heapifyUp();
   }
-
+ 
   dequeue() {
     if (this.isEmpty()) {
       return null;
@@ -190,7 +203,7 @@ class MinPriorityQueue {
           swapIndex = rightChildIndex;
         }
       }
-
+ 
       if (swapIndex === null) break;
 
       this.heap[index] = this.heap[swapIndex];
@@ -206,9 +219,17 @@ function displayResults(results) {
   const resultsDiv = document.getElementById('results');
   resultsDiv.innerHTML = '';
 
-  const message = document.createElement('p');
-  message.textContent = results.message;
-  resultsDiv.appendChild(message);
+  if (Array.isArray(results.message)) {
+    results.message.forEach(msg => {
+      const messageParagraph = document.createElement('p');
+      messageParagraph.textContent = msg;
+      resultsDiv.appendChild(messageParagraph);
+    });
+  } else {
+    const messageParagraph = document.createElement('p');
+    messageParagraph.textContent = results.message;
+    resultsDiv.appendChild(messageParagraph);
+  }
 
   if (results.matrix) {
     const table = document.createElement('table');
@@ -228,7 +249,7 @@ function displayResults(results) {
       const row = document.createElement('tr');
       const rowHeader = document.createElement('td');
       rowHeader.textContent = `Из ${index}`;
-      row.appendChild(rowHeader);
+      row.appendChild(rowHeader); 
 
       result.forEach(dist => {
         const cell = document.createElement('td');
