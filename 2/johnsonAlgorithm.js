@@ -185,11 +185,36 @@ document.getElementById('initialForm').addEventListener('submit', function(event
   function displayResults(results) {
     const resultsDiv = document.getElementById('results');
     resultsDiv.innerHTML = '';
-    
+  
+    const table = document.createElement('table');
+    const headerRow = document.createElement('tr');
+    const headerCell = document.createElement('th');
+    headerCell.textContent = 'Вершина';
+    headerRow.appendChild(headerCell);
+  
+    for (let i = 0; i < results.length; i++) {
+      const headerCell = document.createElement('th');
+      headerCell.textContent = `В ${i}`;
+      headerRow.appendChild(headerCell);
+    }
+    table.appendChild(headerRow);
+  
     results.forEach((result, index) => {
-      const resultElement = document.createElement('p');
-      resultElement.textContent = `Кратчайшие пути из вершины ${index}: ${result.join(', ')}`;
-      resultsDiv.appendChild(resultElement);
+      const row = document.createElement('tr');
+      const rowHeader = document.createElement('td');
+      rowHeader.textContent = `Из ${index}`;
+      row.appendChild(rowHeader);
+  
+      result.forEach(dist => {
+        const cell = document.createElement('td');
+        cell.textContent = dist;
+        row.appendChild(cell);
+      });
+  
+      table.appendChild(row);
     });
+  
+    resultsDiv.appendChild(table);
   }
+  
   
