@@ -43,60 +43,76 @@ document.getElementById('initialForm').addEventListener('submit', function(event
   });
   
   function runJohnsonsAlgorithm(numVertices, edges) {
-    const h = new Array(numVertices + 1).fill(Infinity);
-    h[numVertices] = 0;
+    // Initialize distances
+    const dist = Array(numVertices).fill(Infinity);
+    dist[numVertices] = 0;
   
-    const extendedEdges = edges.slice();
+    // Add an extra vertex (numVertices) and connect it to every other vertex with edge weight 0
     for (let i = 0; i < numVertices; i++) {
-      extendedEdges.push({ start: numVertices, end: i, weight: 0 });
+      edges.push({ start: numVertices, end: i, weight: 0 });
     }
   
+    // Run Bellman-Ford from the extra vertex to detect negative weight cycles
     for (let i = 0; i <= numVertices; i++) {
-      for (const edge of extendedEdges) {
-        if (h[edge.start] + edge.weight < h[edge.end]) {
-          h[edge.end] = h[edge.start] + edge.weight;
+      for (let j = 0; j < edges.length; j++) {
+        const { start, end, weight } = edges[j];
+        if (dist[start] + weight < dist[end]) {
+          dist[end] = dist[start] + weight;
         }
       }
     }
   
-    const reweightedEdges = edges.map(edge => ({
-      start: edge.start,
-      end: edge.end,
-      weight: edge.weight + h[edge.start] - h[edge.end]
-    }));
+    // Check for negative weight cycles
+    for (let j = 0; j < edges.length; j++) {
+      const { start, end, weight } = edges[j];
+      if (dist[start] + weight < dist[end]) {
+        return "Граф содержит отрицательные циклы";
+      }
+    }
   
-    function dijkstra(startVertex) {
-      const distances = new Array(numVertices).fill(Infinity);
-      distances[startVertex] = 0;
-      const priorityQueue = new MinPriorityQueue();
+    // Remove the extra vertex and its edges
+    edges = edges.slice(0, edges.length - numVertices);
   
-      priorityQueue.enqueue(startVertex, 0);
+    // Reweight the edges
+    const h = dist.slice(0, numVertices);
+    for (let i = 0; i < edges.length; i++) {
+      const { start, end, weight } = edges[i];
+      edges[i].weight = weight + h[start] - h[end];
+    }
   
-      while (!priorityQueue.isEmpty()) {
-        const { element: currentVertex, priority: currentDistance } = priorityQueue.dequeue();
+    // Initialize result matrix
+    const result = Array.from({ length: numVertices }, () => Array(numVertices).fill(Infinity));
   
-        for (const edge of reweightedEdges) {
-          if (edge.start === currentVertex) {
-            const distance = currentDistance + edge.weight;
+    // Run Dijkstra for each vertex
+    for (let u = 0; u < numVertices; u++) {
+      const dist = Array(numVertices).fill(Infinity);
+      dist[u] = 0;
+      const pq = new MinPriorityQueue({ priority: x => x.dist });
+      pq.enqueue({ vertex: u, dist: 0 });
   
-            if (distance < distances[edge.end]) {
-              distances[edge.end] = distance;
-              priorityQueue.enqueue(edge.end, distance);
-            }
+      while (!pq.isEmpty()) {
+        const { element: { vertex, dist: d } } = pq.dequeue();
+  
+        if (d > dist[vertex]) continue;
+  
+        for (const { start, end, weight } of edges) {
+          if (start === vertex && dist[end] > dist[start] + weight) {
+            dist[end] = dist[start] + weight;
+            pq.enqueue({ vertex: end, dist: dist[end] });
           }
         }
       }
   
-      return distances;
+      for (let v = 0; v < numVertices; v++) {
+        if (dist[v] < Infinity) {
+          result[u][v] = dist[v] - h[u] + h[v];
+        }
+      }
     }
   
-    const shortestPaths = [];
-    for (let i = 0; i < numVertices; i++) {
-      shortestPaths.push(dijkstra(i).map((dist, j) => dist + h[j] - h[i]));
-    }
-  
-    return shortestPaths;
+    return result;
   }
+  
   
   class MinPriorityQueue {
     constructor() {
@@ -186,35 +202,40 @@ document.getElementById('initialForm').addEventListener('submit', function(event
     const resultsDiv = document.getElementById('results');
     resultsDiv.innerHTML = '';
   
-    const table = document.createElement('table');
-    const headerRow = document.createElement('tr');
-    const headerCell = document.createElement('th');
-    headerCell.textContent = 'Вершина';
-    headerRow.appendChild(headerCell);
-  
-    for (let i = 0; i < results.length; i++) {
+    if (typeof results === 'string') {
+      const errorMessage = document.createElement('p');
+      errorMessage.textContent = results;
+      resultsDiv.appendChild(errorMessage);
+    } else {
+      const table = document.createElement('table');
+      const headerRow = document.createElement('tr');
       const headerCell = document.createElement('th');
-      headerCell.textContent = `В ${i}`;
+      headerCell.textContent = 'Вершина';
       headerRow.appendChild(headerCell);
-    }
-    table.appendChild(headerRow);
   
-    results.forEach((result, index) => {
-      const row = document.createElement('tr');
-      const rowHeader = document.createElement('td');
-      rowHeader.textContent = `Из ${index}`;
-      row.appendChild(rowHeader);
+      for (let i = 0; i < results.length; i++) {
+        const headerCell = document.createElement('th');
+        headerCell.textContent = `В ${i}`;
+        headerRow.appendChild(headerCell);
+      }
+      table.appendChild(headerRow);
   
-      result.forEach(dist => {
-        const cell = document.createElement('td');
-        cell.textContent = dist;
-        row.appendChild(cell);
+      results.forEach((result, index) => {
+        const row = document.createElement('tr');
+        const rowHeader = document.createElement('td');
+        rowHeader.textContent = `Из ${index}`;
+        row.appendChild(rowHeader);
+  
+        result.forEach(dist => {
+          const cell = document.createElement('td');
+          cell.textContent = dist;
+          row.appendChild(cell);
+        });
+  
+        table.appendChild(row);
       });
   
-      table.appendChild(row);
-    });
-  
-    resultsDiv.appendChild(table);
+      resultsDiv.appendChild(table);
+    }
   }
-  
   
