@@ -38,20 +38,19 @@ document.getElementById('edgesForm').addEventListener('submit', function(event) 
     const weight = parseInt(edgeDiv.querySelector('input[name="weight"]').value);
     edges.push({ start: startVertex, end: endVertex, weight });
     console.log(`Ребро ${index + 1}: Начальная вершина: ${startVertex}, Конечная вершина: ${endVertex}, Вес: ${weight}`);
-    });
-    
-    // Запускаем алгоритм Джонсона и отображаем результаты
-    const results = runJohnsonsAlgorithm(numVertices, edges);
-    displayResults(results);
-    });
-    
-    
-    
-    
-    function runJohnsonsAlgorithm(numVertices, edges) {
-      // Инициализация расстояний
-      // зачем то добавил+1 ????
-  console.log(`Входные ребра:  ${edges}`);
+  });
+
+  // Запускаем алгоритм Джонсона и отображаем результаты
+  const results = runJohnsonsAlgorithm(numVertices, edges);
+  displayResults(results);
+});
+
+
+
+
+function runJohnsonsAlgorithm(numVertices, edges) {
+  // Инициализация расстояний
+  
   const dist = Array(numVertices + 1).fill(Infinity);
   dist[numVertices] = 0;
   var messages = [];
