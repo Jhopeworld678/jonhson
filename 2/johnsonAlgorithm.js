@@ -38,22 +38,25 @@ document.getElementById('edgesForm').addEventListener('submit', function(event) 
     const weight = parseInt(edgeDiv.querySelector('input[name="weight"]').value);
     edges.push({ start: startVertex, end: endVertex, weight });
     console.log(`Ребро ${index + 1}: Начальная вершина: ${startVertex}, Конечная вершина: ${endVertex}, Вес: ${weight}`);
-  });
-
-  // Запускаем алгоритм Джонсона и отображаем результаты
-  const results = runJohnsonsAlgorithm(numVertices, edges);
-  displayResults(results);
-});
-
-
-
-
-function runJohnsonsAlgorithm(numVertices, edges) {
-  // Инициализация расстояний
-  // зачем то добавил+1 ????
+    });
+    
+    // Запускаем алгоритм Джонсона и отображаем результаты
+    const results = runJohnsonsAlgorithm(numVertices, edges);
+    displayResults(results);
+    });
+    
+    
+    
+    
+    function runJohnsonsAlgorithm(numVertices, edges) {
+      // Инициализация расстояний
+      // зачем то добавил+1 ????
+  console.log(`Входные ребра:  ${edges}`);
   const dist = Array(numVertices + 1).fill(Infinity);
   dist[numVertices] = 0;
-  var messages = []
+  var messages = [];
+  var counter_bf = 0;
+  var counter_d = 0;
   // Добавляем дополнительную вершину (numVertices) и соединяем её с каждой другой вершиной с весом 0
   for (let i = 0; i < numVertices; i++) {
     edges.push({ start: numVertices, end: i, weight: 0 });
@@ -62,12 +65,13 @@ function runJohnsonsAlgorithm(numVertices, edges) {
   // Запускаем Bellman-Ford из дополнительной вершины, чтобы обнаружить отрицательные циклы
   for (let i = 0; i <= numVertices; i++) {
     for (let j = 0; j < edges.length; j++) {
+      counter_bf++;
       const { start, end, weight } = edges[j];
       if (dist[start] + weight < dist[end]) {
         dist[end] = dist[start] + weight;
       } 
     } 
-    messages.push(`Шаг ${i + 1} алгоритма Беллмана-Форда: ${dist}`)
+    //messages.push(`Шаг ${i + 1} алгоритма Беллмана-Форда: ${dist}`)
     console.log(`Шаг ${i + 1} алгоритма Беллмана-Форда: ${dist}`);
   }
 
@@ -108,6 +112,7 @@ function runJohnsonsAlgorithm(numVertices, edges) {
       if (d > dist[vertex]) continue;
 
       for (const { start, end, weight } of edges) {
+        counter_d++;
         if (start === vertex && dist[end] > dist[start] + weight) {
           dist[end] = dist[start] + weight;
           pq.enqueue({ vertex: end, dist: dist[end] });
@@ -122,7 +127,8 @@ function runJohnsonsAlgorithm(numVertices, edges) {
       }
     }
   }
-
+  console.log("Счетчик циклов БФ: ", counter_bf);
+  console.log("Счетчик циклов Дейкстры: ", counter_d);
   console.log("Результаты:", result);
 
   messages.push("Кратчайшие пути рассчитаны успешно:");
@@ -253,7 +259,7 @@ function displayResults(results) {
 
       result.forEach(dist => {
         const cell = document.createElement('td');
-        cell.textContent = dist === Infinity ? '∞' : dist;
+        cell.textContent = dist === Infinity ? 'INF' : dist;
         row.appendChild(cell);
       });
 
